@@ -1,5 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System;
+﻿using System;
+using System.Numerics;
 
 namespace InrtoductionTypes
 {
@@ -13,14 +13,14 @@ namespace InrtoductionTypes
             {
                 switch(char.ToLower(Console.ReadKey(true).KeyChar))
                 {
-                    // case '1' : Console.Clear(); ShowAllTypeInfo(); break;
-                    // case '2' : Console.Clear(); SelectType(); break;
+                    case '1' : Console.Clear(); ShowAllTypeInfo(); break;
+                    case '2' : Console.Clear(); SelectType(); break;
                     case '3' : ChangeConsoleView(); break;
                     case '0' : Console.Clear(); flag = false; break;
                     default: break;
                 }
             }
-            // Environment.Exit(1);
+            Environment.Exit(1);
             static void ShowMenu()
             {
                 Console.Clear();
@@ -32,9 +32,10 @@ namespace InrtoductionTypes
             }
         }
         // <summary>
-        // changing console colors 
+        // changing console view 
+        // back and foregrounds colors
         // </summary>
-        static void ChangeConsoleView()
+        public static void ChangeConsoleView()
         {
             var flag = true;
             ShowMenu();
@@ -133,6 +134,185 @@ namespace InrtoductionTypes
                                       "0 — Выход в меню\n");
                 }
             }
+        }
+
+        public static void ShowAllTypeInfo()
+        {
+            
+        }
+        // <summary>
+        // show all info about types (basics)
+        // </summary>
+        public static Type SelectType()
+        {
+            var flag = true;
+            ShowMenu();
+            while (flag)
+            {
+                switch (char.ToLower(Console.ReadKey(true).KeyChar))
+                {
+                    case '1' : ShowInfoType(typeof(uint)); break;
+                    case '2' : ShowInfoType(typeof(int)); break;
+                    case '3' : ShowInfoType(typeof(long)); break;
+                    case '4' : ShowInfoType(typeof(float)); break;
+                    case '5' : ShowInfoType(typeof(double)); break;
+                    case '6' : ShowInfoType(typeof(char)); break;
+                    case '7' : ShowInfoType(typeof(string)); break;
+                    case '8' : ShowInfoType(typeof(Vector)); break;
+                    case '9' : ShowInfoType(typeof(Matrix4x4)); break;
+                    case '0' : Main(); break;
+                    default: break;
+                }
+            }
+            
+            static void ShowMenu()
+            {
+                Console.Clear();
+                Console.WriteLine("Информация по типам\n" +
+                                  "Выберите тип:\n" +
+                                  "----------------------------\n" +
+                                  "1 — uint\n" +
+                                  "2 — int\n" +
+                                  "3 — long\n" +
+                                  "4 — float\n" +
+                                  "5 — double\n" +
+                                  "6 — char\n" +
+                                  "7 — string\n" +
+                                  "8 — Vector\n" +
+                                  "9 — Matrix\n" +
+                                  "0 — Выход в главное меню\n");
+            }
+
+            static void ShowInfoType(Type type)
+            {
+                var flag = true;
+                ShowMenu();
+                while (flag)
+                {
+                    switch (char.ToLower(Console.ReadKey(true).KeyChar))
+                    {
+                        case 'm' :
+                            ShowAddInfoType(); break;
+                        case '0' :
+                            SelectType(); break;
+                        default: break;
+                    }
+                }
+                
+                void ShowMenu()
+                {
+                    Console.Clear();
+                    Console.WriteLine("Информация по типу: " + type + "\n" +
+                                      "\tЗначимый тип: " + (type.IsValueType ? "+" : "-") + "\n" +
+                                      "\tПространство имен: " + type.Namespace + "\n" +
+                                      "\tСборка: " + type.Assembly.GetName().Name + "\n" +
+                                      "\tОбщее число элементов: " + type.GetMembers().Length + "\n" +
+                                      "\tЧисло методов: " + type.GetMethods().Length + "\n" +
+                                      "\tЧисло свойств: " + type.GetProperties().Length + "\n" +
+                                      "\tЧисло полей: " + type.GetFields().Length + "\n" +
+                                      "\tСписок полей: " + CreateStringFields() + "\n" +
+                                      "\tСписок свойств: " + CreateStringProps() + "\n" +
+                                      "\n" +
+                                      "Нажмите 'M' для вывода дополнительной информации по методам\n" +
+                                      "Нажмите '0' для выхода в меню\n" );
+                                      
+                    string CreateStringFields()
+                    {
+                        var fieldNames = new List<string>();
+                        foreach (var item in type.GetFields())
+                        {
+                            fieldNames.Add(item.Name);
+                        }
+                        var sFieldsNames = String.Join(", ", fieldNames);
+                        return (sFieldsNames.Length > 0)?sFieldsNames:"—";
+                    }
+                    string CreateStringProps()
+                    {
+                        var propNames = new List<string>();
+                        foreach (var item in type.GetProperties())
+                        {
+                            propNames.Add(item.Name);
+                        }
+                        var sPropsNames = String.Join(", ", propNames);
+                        return (sPropsNames.Length > 0)?sPropsNames:"—";
+                    }
+                }
+                
+                void ShowAddInfoType()
+                {
+                    var top = 1;
+                    var flag = true;
+                    ShowMenu();
+                    while (flag)
+                    {
+                        switch (char.ToLower(Console.ReadKey(true).KeyChar))
+                        {                                
+                            case '0' : ShowInfoType(type);
+                                break;
+                            default: break;
+                        }
+                    }
+                    void ShowMenu()
+                    {
+                        Console.Clear();
+                        Console.Clear();
+                        Console.Write("Методы типа: " + type + "\n" +
+                                      "Название");
+                        Console.SetCursorPosition(30, top);
+                        Console.Write("Число перегрузок");
+                        Console.SetCursorPosition(60, top);
+                        Console.Write("Число параметров\n");
+                        top++;
+                        ShowStringMethods();
+                        Console.Write("0 — для выхода в главное меню");
+                        
+                    }
+                    void ShowStringMethods()
+                    {
+                        var tempArr = new int[2]{0,0};
+                        var overloads = new Dictionary<string, int>();
+                        var parametrs = new Dictionary<string, int[]>();
+                        foreach (var method in type.GetMethods())
+                        {
+                            if (overloads.ContainsKey(method.Name))
+                                overloads[method.Name]++;
+                            else 
+                                overloads.Add((method.Name), 1);
+                        }
+
+                        foreach (var method in type.GetMethods())
+                        {
+                            if (!parametrs.ContainsKey(method.Name))
+                            {
+                                parametrs.Add(method.Name, new int[2]);
+                            }
+                            foreach (var parameter in method.GetParameters())
+                            {
+                                tempArr[1]++;
+                                if(parameter.IsOptional)  tempArr[0]++;
+                            }
+
+                            if (tempArr[0] < parametrs[method.Name][0]) parametrs[method.Name][0] = tempArr[0];
+                            if (tempArr[1] > parametrs[method.Name][1]) parametrs[method.Name][1] = tempArr[1];
+                            tempArr[0] = 0;
+                            tempArr[1] = 0;
+                        }
+
+                        foreach (var item in overloads)
+                        {
+                            Console.Write(item.Key);
+                            Console.SetCursorPosition(30, top);
+                            Console.Write(item.Value);
+                            Console.SetCursorPosition(60, top);
+                            Console.Write(parametrs[item.Key][0] == parametrs[item.Key][1]
+                                ? parametrs[item.Key][0] + "\n"
+                                : parametrs[item.Key][0] + ".." + parametrs[item.Key][1] + "\n");
+                            top++;
+                        }
+                    }
+                }
+            }
+            return typeof(int);
         }
     }
 }
