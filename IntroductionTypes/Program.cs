@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Reflection;
 
 namespace InrtoductionTypes
 {
@@ -135,15 +136,71 @@ namespace InrtoductionTypes
                 }
             }
         }
-
+        // <summary>
+        // show general info about types
+        // longest name method and name of type with
+        // the largest number of fields
+        // </summary>
         public static void ShowAllTypeInfo()
         {
+            var flag = true;
+            var myAsm = Assembly.GetExecutingAssembly();
+            var thisAssemblyTypes = myAsm.GetTypes(); 
+            var refAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+            List<Type> types = new ();
+            foreach(var asm in refAssemblies)
+                types.AddRange(asm.GetTypes());
+            var nRefTypes = 0;
+            var nValueTypes = 0;
+            var longestMethodName = "";
+            var maxAmountFields = 0;
+            var maxFieldsTypeName = "";
+            foreach(var t in types)
+            {
+                var countFields = 0;
+                
+                if(t.IsClass)
+                    nRefTypes++;
+                else if(t.IsValueType)
+                    nValueTypes++;
+                
+                foreach (var method in t.GetMethods())
+                {
+                    if (method.Name.Length > longestMethodName.Length) longestMethodName = method.Name;
+                }
+
+                if (t.GetFields().Length > maxAmountFields)
+                {
+                    maxAmountFields = t.GetFields().Length;
+                    maxFieldsTypeName = t.Name;
+                }
+            } 
+            ShowMenu();
+            while (flag)
+            {
+                switch (char.ToLower(Console.ReadKey(true).KeyChar))
+                {
+                    default: Main(); break;
+                }
+            }
             
+            void ShowMenu()
+            {
+                Console.Clear();
+                Console.WriteLine("Общая информация по типам\n" +
+                                  "Подключенные сборки: " + thisAssemblyTypes.Length + "\n" +
+                                  "Всего типов по всем подключенным сборкам: " + types.Count + "\n" +
+                                  "Ссылочные типы (только классы): " + nRefTypes + "\n" +
+                                  "Значимые типы: " + nValueTypes + "\n" +
+                                  "Самое длинное название свойства: " + longestMethodName + "\n" +
+                                  "Тип с наибольшим числом полей: " + maxFieldsTypeName + "\n" +
+                                  "\nНажмите любую клавишу, чтобы вернуться в главное меню");
+            }
         }
         // <summary>
         // show all info about types (basics)
         // </summary>
-        public static Type SelectType()
+        public static void SelectType()
         {
             var flag = true;
             ShowMenu();
@@ -312,7 +369,7 @@ namespace InrtoductionTypes
                     }
                 }
             }
-            return typeof(int);
+            // return typeof(int);
         }
     }
 }
