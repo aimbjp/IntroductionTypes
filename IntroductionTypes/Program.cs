@@ -2,6 +2,8 @@
 using System.Numerics;
 using System.Reflection;
 
+// code from extra task pointed as Extra task code
+
 namespace InrtoductionTypes
 {
     internal class Programm
@@ -140,6 +142,9 @@ namespace InrtoductionTypes
         // show general info about types
         // longest name method and name of type with
         // the largest number of fields
+        // Extra Task code
+        // show length of longest name method
+        // show 15 names of fields under 11 symbols in type with the largest number of fields
         // </summary>
         public static void ShowAllTypeInfo()
         {
@@ -155,6 +160,9 @@ namespace InrtoductionTypes
             var longestMethodName = "";
             var maxAmountFields = 0;
             var maxFieldsTypeName = "";
+            //Extra task code
+            var arrNameFields = new List<string>();
+            var nArrNameFields = "";
             foreach(var t in types)
             {
                 var countFields = 0;
@@ -171,8 +179,23 @@ namespace InrtoductionTypes
 
                 if (t.GetFields().Length > maxAmountFields)
                 {
+                    var counter = 0;
                     maxAmountFields = t.GetFields().Length;
                     maxFieldsTypeName = t.Name;
+                    //Extra task code
+                    arrNameFields.Clear();
+                    foreach (var field in t.GetFields())
+                    {
+                        if (counter < 15 && field.Name.Length < 11)
+                        {
+                            arrNameFields.Add(field.Name);
+                            counter++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
             } 
             ShowMenu();
@@ -183,7 +206,7 @@ namespace InrtoductionTypes
                     default: Main(); break;
                 }
             }
-            
+
             void ShowMenu()
             {
                 Console.Clear();
@@ -192,13 +215,20 @@ namespace InrtoductionTypes
                                   "Всего типов по всем подключенным сборкам: " + types.Count + "\n" +
                                   "Ссылочные типы (только классы): " + nRefTypes + "\n" +
                                   "Значимые типы: " + nValueTypes + "\n" +
-                                  "Самое длинное название свойства: " + longestMethodName + "\n" +
-                                  "Тип с наибольшим числом полей: " + maxFieldsTypeName + "\n" +
-                                  "\nНажмите любую клавишу, чтобы вернуться в главное меню");
+                                  "Самое длинное название свойства: " + longestMethodName + " \n" +
+                                  //Extra task code
+                                  "Длина названия самого длинного свойства: " + longestMethodName.Length + "\n" +
+                                  "Тип с наибольшим числом полей: " + maxFieldsTypeName + "\n");
+                Console.Write("Список полей (первые 15 с название меньше 11): " + String.Join(", ", arrNameFields) + "\n");
+                Console.Write("\nНажмите любую клавишу, чтобы вернуться в главное меню");
             }
+            
         }
         // <summary>
         // show all info about types (basics)
+        // Extra Task code
+        // add sorting by number of overloads
+        // add sorting by max number of parametrs
         // </summary>
         public static void SelectType()
         {
@@ -221,7 +251,6 @@ namespace InrtoductionTypes
                     default: break;
                 }
             }
-            
             static void ShowMenu()
             {
                 Console.Clear();
@@ -239,7 +268,6 @@ namespace InrtoductionTypes
                                   "9 — Matrix\n" +
                                   "0 — Выход в главное меню\n");
             }
-
             static void ShowInfoType(Type type)
             {
                 var flag = true;
@@ -249,7 +277,7 @@ namespace InrtoductionTypes
                     switch (char.ToLower(Console.ReadKey(true).KeyChar))
                     {
                         case 'm' :
-                            ShowAddInfoType(); break;
+                            ShowAddInfoType(0, -1); break;
                         case '0' :
                             SelectType(); break;
                         default: break;
@@ -295,7 +323,7 @@ namespace InrtoductionTypes
                     }
                 }
                 
-                void ShowAddInfoType()
+                void ShowAddInfoType(int numOver, int numParamMax)
                 {
                     var top = 1;
                     var flag = true;
@@ -306,6 +334,8 @@ namespace InrtoductionTypes
                         {                                
                             case '0' : ShowInfoType(type);
                                 break;
+                            case '1' :
+                                ShowAddMenu(); ShowStringMethods(Console.ReadKey().KeyChar); break;
                             default: break;
                         }
                     }
@@ -320,15 +350,32 @@ namespace InrtoductionTypes
                         Console.SetCursorPosition(60, top);
                         Console.Write("Число параметров\n");
                         top++;
-                        ShowStringMethods();
+                        ShowStringMethods(numOver);
+                        //Extra task code
+                        Console.WriteLine("1 — для сортировки");
                         Console.Write("0 — для выхода в главное меню");
                         
+                        
                     }
-                    void ShowStringMethods()
+                    //Extra task code
+                    void ShowAddMenu()
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Кол-во перегрузок (не использовать параметр введите '0'): ");
+                        numOver = int.Parse(Console.ReadKey().KeyChar.ToString());
+                        Console.WriteLine("\nКол-во параметров максимум (не использовать параметр введите '-1', не забудьте нажать enter после ввода): ");
+                        numParamMax = int.Parse(Console.ReadLine());
+                        ShowAddInfoType(numOver, numParamMax);
+                    }
+                    
+                    
+                    
+                    void ShowStringMethods(int numOver)
                     {
                         var tempArr = new int[2]{0,0};
                         var overloads = new Dictionary<string, int>();
                         var parametrs = new Dictionary<string, int[]>();
+                        
                         foreach (var method in type.GetMethods())
                         {
                             if (overloads.ContainsKey(method.Name))
@@ -354,18 +401,52 @@ namespace InrtoductionTypes
                             tempArr[0] = 0;
                             tempArr[1] = 0;
                         }
-
+                        //Extra task code
+                        var ov = overloads.Count;
+                        var par = parametrs.Count;
                         foreach (var item in overloads)
                         {
-                            Console.Write(item.Key);
-                            Console.SetCursorPosition(30, top);
-                            Console.Write(item.Value);
-                            Console.SetCursorPosition(60, top);
-                            Console.Write(parametrs[item.Key][0] == parametrs[item.Key][1]
-                                ? parametrs[item.Key][0] + "\n"
-                                : parametrs[item.Key][0] + ".." + parametrs[item.Key][1] + "\n");
-                            top++;
+                            //Extra task code
+                            void SubstOvOrParam()
+                            {
+                                ov--;
+                                par--;
+                            }
+                            void ShowMethodsInfo()
+                            {
+                                Console.Write(item.Key);
+                                Console.SetCursorPosition(30, top);
+                                Console.Write(item.Value);
+                                Console.SetCursorPosition(60, top);
+                                Console.Write(parametrs[item.Key][0] == parametrs[item.Key][1]
+                                    ? parametrs[item.Key][0] + "\n"
+                                    : parametrs[item.Key][0] + ".." + parametrs[item.Key][1] + "\n");
+                                top++;
+                            }
+                            if (numOver == 0 && numParamMax == -1)
+                            {
+                                ShowMethodsInfo();
+                                SubstOvOrParam();
+                            }
+                            //Extra task code 
+                            else if(item.Value == numOver && numParamMax == -1)
+                            {
+                                ShowMethodsInfo();
+                                SubstOvOrParam();
+                            }
+                            else if (numOver == 0 && parametrs[item.Key][1] == numParamMax)
+                            {
+                                ShowMethodsInfo();
+                                SubstOvOrParam();
+                            }
+                            else if (item.Value == numOver && parametrs[item.Key][1] == numParamMax)
+                            {
+                                ShowMethodsInfo();
+                                SubstOvOrParam();
+                            }
                         }
+                        //Extra task code
+                        if (ov == overloads.Count) Console.Write("Таких методов нет\n");
                     }
                 }
             }
